@@ -22,33 +22,61 @@ jobs:
         with:
           persist-credentials: true
 
-      - name: Reconstruct and install website source
+      - name: Reconstruct archive, correcting one transfer-character error
         shell: bash
         run: |
           set -euo pipefail
-          parts=(00 01 02 03 04 05 06 07)
-          for part in "${parts[@]}"; do
-            if [ ! -s "upload-parts/part-${part}.txt" ]; then
-              echo "Waiting for source archive part ${part}; nothing to do yet."
-              exit 0
-            fi
-          done
+          python - <<'PY'
+          import base64, gzip, io, tarfile
+          from pathlib import Path
 
-          for part in "${parts[@]}"; do
-            cat "upload-parts/part-${part}.txt"
-          done > /tmp/source.tar.gz.b64
-          base64 --decode /tmp/source.tar.gz.b64 > /tmp/source.tar.gz
-          tar -tzf /tmp/source.tar.gz > /dev/null
-          mkdir -p /tmp/source-project
-          tar -xzf /tmp/source.tar.gz -C /tmp/source-project
+          names = [f"{i:02d}" for i in range(8)]
+          parts = []
+          for name in names:
+              p = Path(f"upload-parts/part-{name}.txt")
+              if not p.exists():
+                  raise SystemExit(f"Missing source part {name}")
+              parts.append(p.read_text().strip())
+
+          encoded = "".join(parts)
+          # The transfer introduced one extra character into the final piece.
+          # Try deleting one character from that piece and accept only a valid
+          # gzip CRC + tar archive containing the project's package.json.
+          prefix = "".join(parts[:-1])
+          tail = parts[-1]
+          recovered = None
+          for offset in range(len(tail)):
+              candidate = prefix + tail[:offset] + tail[offset + 1:]
+              try:
+                  binary = base64.b64decode(candidate, validate=True)
+                  tar_bytes = gzip.decompress(binary)  # validates gzip CRC
+                  with tarfile.open(fileobj=io.BytesIO(tar_bytes), mode="r:") as archive:
+                      members = archive.getnames()
+                      if "ai-adventure-academy/package.json" not in members:
+                          continue
+                      if "ai-adventure-academy/src" not in members:
+                          continue
+                  recovered = tar_bytes
+                  print(f"Recovered archive by removing extra character at final-part offset {offset}.")
+                  break
+              except (ValueError, OSError, EOFError, tarfile.TarError):
+                  continue
+
+          if recovered is None:
+              raise SystemExit("Could not recover the source archive; no matching valid gzip/tar candidate.")
+          Path("/tmp/source.tar").write_bytes(recovered)
+
+          with tarfile.open("/tmp/source.tar", "r:") as archive:
+              archive.extractall("/tmp/source-project", filter="data")
+          PY
           test -d /tmp/source-project/ai-adventure-academy
+          test -f /tmp/source-project/ai-adventure-academy/package.json
           cp -a /tmp/source-project/ai-adventure-academy/. .
 
-          # Remove temporary transfer data and this one-time import workflow.
           rm -rf upload-parts
           rm -f .github/workflows/import-source.yml
           rmdir .github/workflows .github 2>/dev/null || true
-          rm -rf /tmp/source-project /tmp/source.tar.gz /tmp/source.tar.gz.b64
+          rm -rf /tmp/source-project /tmp/source.tar
 
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
