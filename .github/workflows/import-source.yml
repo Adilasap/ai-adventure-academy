@@ -54,7 +54,7 @@ jobs:
                       members = archive.getnames()
                       if "ai-adventure-academy/package.json" not in members:
                           continue
-                      if "ai-adventure-academy/src" not in members:
+                      if not any(name.startswith("ai-adventure-academy/src/") for name in members):
                           continue
                   recovered = tar_bytes
                   print(f"Recovered archive by removing extra character at final-part offset {offset}.")
