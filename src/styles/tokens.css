@@ -1,0 +1,91 @@
+/*
+ * Design tokens — taken from the rendered CSS custom properties of the
+ * reference site (aikids.flocci.in), inspected on 2026-10-20:
+ *   --background 45 30% 98%, --ink 220 20% 10%, --ink-light 220 10% 40%,
+ *   crayon blue/yellow/green/purple/pink/orange/red, --shadow-sketch,
+ *   paper-dot background, Caveat (headings) + Patrick Hand (body),
+ *   "napkin" border radius 255px 15px 225px / 15px 225px 15px 255px.
+ * Values below the "Brand additions" marker are our own additions.
+ */
+:root {
+  /* Colour — HSL channels so they can be used with alpha */
+  --paper: 45 30% 98%;
+  --paper-card: 45 40% 97%;
+  --muted: 45 20% 92%;
+  --ink: 220 20% 10%;
+  --ink-soft: 220 15% 15%;
+  --ink-light: 220 10% 40%;
+  --line: 220 15% 80%;
+
+  --crayon-blue: 210 90% 55%;
+  --crayon-yellow: 45 95% 55%;
+  --crayon-green: 145 70% 45%;
+  --crayon-purple: 270 70% 60%;
+  --crayon-pink: 330 80% 65%;
+  --crayon-orange: 25 95% 55%;
+  --crayon-red: 0 85% 60%;
+
+  /* Brand additions */
+  --crayon-blue-deep: 210 85% 40%;   /* blue text on paper with AA contrast */
+  --crayon-purple-deep: 270 55% 45%;
+  --crayon-green-deep: 145 75% 26%;
+  --whatsapp: 142 70% 41%;           /* #25d366-ish, darkened for contrast */
+  --whatsapp-dark: 142 72% 29%;
+
+  /* Typography */
+  --font-sketch: "Caveat", "Segoe Print", "Comic Sans MS", cursive;
+  --font-hand: "Patrick Hand", "Segoe Print", "Comic Sans MS", cursive;
+  --text-sm: 1rem;
+  --text-base: 1.125rem;
+  --text-lg: 1.3rem;
+  --text-xl: 1.6rem;
+  --h3: clamp(1.7rem, 1.4rem + 1vw, 2.1rem);
+  --h2: clamp(2.8rem, 2rem + 3.6vw, 4.5rem);
+  --h1: clamp(3.1rem, 2rem + 5vw, 5.6rem);
+
+  /* Spacing */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4.5rem;
+  --space-9: 6rem;
+  --content-max: 1200px;
+  --gutter: clamp(1rem, 4vw, 2rem);
+
+  /* Shape */
+  --radius-napkin: 255px 15px 225px / 15px 225px 15px 255px;
+  --radius-napkin-alt: 15px 225px 15px 255px / 255px 15px 225px 15px;
+  --radius-tag: 20px 8px;
+  --radius-pill: 999px;
+  --border-thin: 2px solid hsl(var(--ink));
+  --border-bold: 3px solid hsl(var(--ink));
+
+  /* Shadow */
+  --shadow-sketch: 3px 3px 0 hsl(var(--ink-soft) / 0.1);
+  --shadow-sketch-hover: 5px 5px 0 hsl(var(--ink-soft) / 0.15);
+  --shadow-pop: 4px 4px 0 hsl(var(--ink));
+  --shadow-pop-hover: 6px 6px 0 hsl(var(--ink));
+
+  /* Motion */
+  --dur-fast: 150ms;
+  --dur: 200ms;
+  --dur-slow: 400ms;
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Layout chrome */
+  --progress-h: 4px;
+  --header-h: 68px;
+  --header-offset: calc(var(--progress-h) + var(--header-h) + 12px);
+  --fab-size: 60px;
+}
+
+@media (max-width: 639px) {
+  :root {
+    --header-h: 60px;
+    --fab-size: 56px;
+  }
+}
